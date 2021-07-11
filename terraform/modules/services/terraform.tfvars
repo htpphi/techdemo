@@ -1,2 +1,2 @@
-resource_group_name     = "demochallenge"
-location                = "australiaeast"
+resource_group_name = "demochallenge"
+location            = "australiaeast"
