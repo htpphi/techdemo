@@ -1,3 +1,2 @@
-name     = "goDemoChallenge"
-location = "australiaeast"
-prefix   = "tf"
+resource_group_name     = "demochallenge"
+location                = "australiaeast"

@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
+      source = "hashicorp/azurerm"
       version = "=2.46.0"
     }
   }
@@ -23,33 +23,54 @@ provider "azurerm" {
   # tenant_id       = "..."
 }
 
-
-resource "azurerm_resource_group" "goDemoChallengeApp" {
-  name     = "goDemoResourceGroup"
-  location = "australiasoutheast"
+# Create a new Resource Group
+resource "azurerm_resource_group" "demochallenge" {
+    name                =  "demochallenge-RG"
+    location            =  "australiasoutheast"
 }
 
-resource "azurerm_app_service_plan" "goDemoChallengeApp" {
-  name                = "CloudAppServicePlan"
-  location            = azurerm_resource_group.goDemoChallengeApp.location
-  resource_group_name = azurerm_resource_group.goDemoChallengeApp.name
+ #Create an App Service Plan with Linux
+resource "azurerm_app_service_plan" "appserviceplan" {
+  name                = "${azurerm_resource_group.demochallenge.name}-plan"
+  location            = "${azurerm_resource_group.demochallenge.location}"
+  resource_group_name = "${azurerm_resource_group.demochallenge.name}"
+
+  # Define Linux as Host OS
+  kind = "Linux"
+
+  reserved            = true
+
+  # Choose size
   sku {
     tier = "Standard"
     size = "S1"
   }
-}
 
-resource "azurerm_app_service" "goDemoChallengeApp" {
-  name                = "ProductionAppService"
-  location            = azurerm_resource_group.goDemoChallengeApp.location
-  resource_group_name = azurerm_resource_group.goDemoChallengeApp.name
-  app_service_plan_id = azurerm_app_service_plan.goDemoChallengeApp.id
-}
 
-resource "azurerm_app_service_slot" "goDemoChallengeApp" {
-  name                = "ProductionAppServiceSlotOne"
-  location            = azurerm_resource_group.goDemoChallengeApp.location
-  resource_group_name = azurerm_resource_group.goDemoChallengeApp.name
-  app_service_plan_id = azurerm_app_service_plan.goDemoChallengeApp.id
-  app_service_name    = azurerm_app_service.goDemoChallengeApp.name
+}
+ #Create an Azure Web App for Containers in that App Service Plan
+resource "azurerm_app_service" "dockerapp" {
+  name                = "${azurerm_resource_group.demochallenge.name}-dockerapp"
+  location            = "${azurerm_resource_group.demochallenge.location}"
+  resource_group_name = "${azurerm_resource_group.demochallenge.name}"
+  app_service_plan_id = "${azurerm_app_service_plan.appserviceplan.id}"
+
+  app_settings = {
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
+
+    # Settings for private Container Registires  
+    DOCKER_REGISTRY_SERVER_URL      = "https://index.docker.io"
+    DOCKER_REGISTRY_SERVER_USERNAME = ""
+    DOCKER_REGISTRY_SERVER_PASSWORD = ""
+  }
+
+  # Configure Docker Image to load on start
+  site_config {
+    linux_fx_version = "DOCKER|servian/techchallengeapp:latest"
+    always_on        = "true"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
