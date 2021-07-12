@@ -1,32 +1,63 @@
+
+
 variable "resource_group_name" {
-  description = "The name of the resource group we want to use"
-  default     = ""
+  description = "Default resource group name that the network will be created in."
+  default     = "phi-rg"
 }
 
 variable "location" {
-  description = "The location/region where we are crrating the resource"
-  default     = ""
+  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  default     = "Australia East"
 }
 
 variable "tags" {
-  description = "The tags to associate the resource we are creating"
+  description = "The tags to associate with your network and subnets."
   type        = map(string)
-  default     = {}
+
+  default = {
+    BillTo              = "Infrastructure "
+    Platform            = "Prd"
+    AppSupportTeam      = "Infrastructure"
+    Description         = "Network"
+    OperatingHours      = "2400x7"
+  }
 }
 
-# Everything below is for the module
-
-variable "vnet_name" {
-  description = "Name of the vnet to create"
-  default     = ""
+variable "app_plan_name" {
+  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  default     = "AppPlanName"
 }
 
-variable "address_space" {
-  description = "The address space that is used by the virtual network."
-  default     = ""
+variable "app_name" {
+    description = "A list of public app names." 
 }
 
-variable "dns_servers" {
-  description = "The DNS servers to be used with vNet."
-  default     = []
+variable "app_service_plan_ids" {
+     type        = map(string)
+    default     = {}
 }
+
+
+variable "subnet_id" {
+  description = "The address prefix to use for the subnet."
+  default     = ["10.0.1.0/24"]
+}
+
+variable "app_kind" {
+  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+}
+
+variable "app_sku" {
+  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  default     = "Australia East"
+}
+
+variable "app_tier" {
+  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  default     = "Australia East"
+}
+variable "app_size" {
+description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  default     = "Australia East"
+}
+

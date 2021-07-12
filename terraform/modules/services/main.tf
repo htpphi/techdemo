@@ -1,26 +1,20 @@
-# We strongly recommend using the required_providers block to set the
-# Azure Provider source and version being used
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "=2.46.0"
-    }
-  }
-}
 
 
-# Configure the Microsoft Azure Provider
-provider "azurerm" {
-  features {}
-  # More information on the authentication methods supported by
-  # the AzureRM Provider can be found here:
-  # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
-  # subscription_id = "..."
-  # client_id       = "..."
-  # client_secret   = "..."
-  # tenant_id       = "..."
-}
+ /*resource "azurerm_app_service_environment" "techdemo_ase" {
+  name                         = var.ase_name
+  subnet_id                    = var.subnet_id
+  resource_group_name = var.resource_group_name
+ pricing_tier                 = var.pricing_tier
+  front_end_scale_factor       = var.front_end_scale_factor 
+  internal_load_balancing_mode = var.internal_load_balancing_mode
+  allowed_user_ip_cidrs        = var.allowed_user_ip_cidrs
+
+  cluster_setting {
+    name  = "DisableTls1.0"
+    value = "1"
+  }*/
+
+
 
 locals {
  env_variables = {
@@ -28,39 +22,38 @@ locals {
    DOCKER_REGISTRY_SERVER_USERNAME       = "ACR01"
    DOCKER_REGISTRY_SERVER_PASSWORD       = "**************"
  }
+
 }
 
-# Create a new Resource Group
-resource "azurerm_resource_group" "MYRG" {
-    name                =  "MYRG"
-    location            =  "australiasoutheast"
-}
 
 resource "azurerm_user_assigned_identity" "assigned_identity" {
-  resource_group_name = azurerm_resource_group.MYRG.name
-  location            = azurerm_resource_group.MYRG.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
   name = "User_ACR_pull"
 }
 
-resource "azurerm_app_service_plan" "my_service_plan" {
- name                = "my_service_plan"
- location            = "Australia SouthEast"
- resource_group_name = azurerm_resource_group.MYRG.name
- kind                = "Linux"
+#Creates an app service plan
+resource "azurerm_app_service_plan" "techdemoplan" {
+ name                = var.app_plan_name
+ location            = var.location
+ resource_group_name = var.resource_group_name
+ kind                = var.app_kind
  reserved            = true
 
  sku {
    tier     = "Standard"
    size     = "S1"
-   capacity = "5"
+   capacity = "3"
  }
 }
 
-resource "azurerm_app_service" "my_app_service_container" {
- name                    = "myappservicecontainer"
- location                = "Australia southeast"
- resource_group_name     = azurerm_resource_group.MYRG.name
- app_service_plan_id     = azurerm_app_service_plan.my_service_plan.id
+#Creates an app service container
+resource "azurerm_app_service" "techdemoplan_container" {
+ count                   = length(var.app_name)
+ name                    = var.app_name[count.index]
+ location                = var.location
+ resource_group_name     = var.resource_group_name
+ app_service_plan_id     = azurerm_app_service_plan.techdemoplan.id
  https_only              = true
  client_affinity_enabled = true
  site_config {
@@ -78,14 +71,22 @@ resource "azurerm_app_service" "my_app_service_container" {
  }
 
  app_settings = local.env_variables 
+
+ /*connection_string {
+    name  = "Database"
+    type  = "PostgreSQL"
+    value = "Server=tcp:azurerm_sql_server.sqldb.fully_qualified_domain_name Database=azurerm_sql_database.db.name;User ID=azurerm_sql_server.sqldb.administrator_login;Password=azurerm_sql_server.sqldb.administrator_login_password;Trusted_Connection=False;Encrypt=True;"
+  }*/
 }
 
-resource "azurerm_app_service_slot" "my_app_service_container_staging" {
+
+/*#Creates a staging slot for app service plan
+resource "azurerm_app_service_slot" "app_service_container_staging" {
  name                    = "staging"
- app_service_name        = azurerm_app_service.my_app_service_container.name
+ app_service_name        = azurerm_app_service.techdemoplan_container.name
  location                = "Australia Southeast"
- resource_group_name     = azurerm_resource_group.MYRG.name
- app_service_plan_id     = azurerm_app_service_plan.my_service_plan.id
+ resource_group_name     = var.resource_group_name
+ app_service_plan_id     = azurerm_app_service_plan.techdemoplan.id
  https_only              = true
  client_affinity_enabled = true
  site_config {
@@ -101,3 +102,4 @@ resource "azurerm_app_service_slot" "my_app_service_container_staging" {
 
  app_settings = local.env_variables
 }
+*/
