@@ -42,6 +42,12 @@ module "app_service_plan"{
   resource_group_name   = azurerm_resource_group.MYRG.name
   app_kind              = "Linux"
   app_name                = "myappservicecontainer"
+
+  sku = {
+    tier = "Basic"
+    size = "B2"
+    capacity  = "1"
+  }
 }
 
 module "app_service_plan2"{
@@ -51,6 +57,11 @@ module "app_service_plan2"{
   resource_group_name   = azurerm_resource_group.MYRG.name
   app_kind              = "Linux"
   app_name                = "myappservicecontainer2"
+  sku = {
+    tier = "Basic"
+    size = "B2"
+    capacity  = "1"
+  }
 }
 /*#Create an app service container
 module "app_service_container"{

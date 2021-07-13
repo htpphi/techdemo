@@ -18,14 +18,14 @@
 
 locals {
  env_variables = {
-   DOCKER_REGISTRY_SERVER_URL            = "https://arc01.azurecr.io"
-   DOCKER_REGISTRY_SERVER_USERNAME       = "ACR01"
-   DOCKER_REGISTRY_SERVER_PASSWORD       = "**************"
+   DOCKER_REGISTRY_SERVER_URL            = "https://index.docker.io"
+   DOCKER_REGISTRY_SERVER_USERNAME       = ""
+   DOCKER_REGISTRY_SERVER_PASSWORD       = ""
+   WEBSITES_PORT                         =  3000
  }
 
+default_sku_capacity = var.sku["tier"] == "Dynamic" ? null : 2
 }
-
-
 resource "azurerm_user_assigned_identity" "assigned_identity" {
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -41,29 +41,27 @@ resource "azurerm_app_service_plan" "techdemoplan" {
  reserved            = true
 
  sku {
-   tier     = "Standard"
-   size     = "S1"
-   capacity = "3"
- }
+    capacity = lookup(var.sku, "capacity", local.default_sku_capacity)
+    size     = lookup(var.sku, "size", null)
+    tier     = lookup(var.sku, "tier", null)
+  }
 }
 
 #Creates an app service container
 resource "azurerm_app_service" "techdemoplan_container" {
- count                   = length(var.app_name)
- name                    = var.app_name[count.index]
+ name                    = var.app_name
  location                = var.location
  resource_group_name     = var.resource_group_name
  app_service_plan_id     = azurerm_app_service_plan.techdemoplan.id
  https_only              = true
  client_affinity_enabled = true
  site_config {
-   scm_type  = "VSTSRM"
-   always_on = "true"
+   scm_type = "VSTSRM"
 
-   linux_fx_version  = "DOCKER|arc01.azurecr.io/myapp:latest" #define the images to usecfor you application
-
+   linux_fx_version  = "DOCKER|servian/techchallengeapp:latest" #define the images to usecfor you application
    health_check_path = "/health" # health check required in order that internal app service plan loadbalancer do not loadbalance on instance down
  }
+
 
  identity {
    type         = "SystemAssigned, UserAssigned"

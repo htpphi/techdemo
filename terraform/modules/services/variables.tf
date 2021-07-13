@@ -37,7 +37,6 @@ variable "app_service_plan_ids" {
     default     = {}
 }
 
-
 variable "subnet_id" {
   description = "The address prefix to use for the subnet."
   default     = ["10.0.1.0/24"]
@@ -47,17 +46,8 @@ variable "app_kind" {
   description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
 }
 
-variable "app_sku" {
-  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
-  default     = "Australia East"
+variable "sku" {
+  type        = map(string)
 }
 
-variable "app_tier" {
-  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
-  default     = "Australia East"
-}
-variable "app_size" {
-description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
-  default     = "Australia East"
-}
 
